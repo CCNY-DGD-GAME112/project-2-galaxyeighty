@@ -1,25 +1,36 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    private Rigidbody rb;
+    private Vector2 moveInput;
 
-    public float moveSpeed = 6;
+
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        Vector3 inputDirection = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical")).normalized;
-        float inputMagnitude = inputDirection.magnitude;
-
-        float targetAngle = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg;
-        transform.eulerAngles = Vector3.up * targetAngle;
-
-        transform.Translate(transform.forward * moveSpeed * Time.deltaTime, Space.World);
+      
     }
+
 
     // Update is called once per frame
-    void Update()
+
+    private void Awake()
     {
-        
+        rb = GetComponent<Rigidbody>();
     }
+
+    public void OnMovement(InputAction.CallbackContext context)
+    {
+        moveInput = context.ReadValue<Vector2>();
+    }
+
+    private void Update()
+    {
+        rb.linearVelocity = new Vector3(moveInput.x, rb.linearVelocity.y, moveInput.y);
+    }
+    
 }
