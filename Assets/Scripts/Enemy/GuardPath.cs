@@ -58,6 +58,8 @@ public class GuardPath : MonoBehaviour
         }
     }
 
+    
+
     void OnDrawGizmos()
     {
         Vector3 startPosition = pathHolder.GetChild(0).position;
