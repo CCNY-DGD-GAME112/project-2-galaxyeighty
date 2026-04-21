@@ -1,13 +1,19 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    public event System.Action OnLevelEnd;
     public float speed = 4f;
     private Vector2 move;
 
     float angle;
     Rigidbody rb;
+    bool disabled;
+
+    private Animator animator;
+    private CharacterController controller;
 
     public void OnMove(InputAction.CallbackContext context)
     {
@@ -18,12 +24,36 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        GuardPath.OnGuardHasSpottedPlayer += Disable;
+
+        animator = GetComponent<Animator>();
+        controller = GetComponent<CharacterController>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        movePlayer();
+        if (!disabled)
+        {
+            movePlayer();
+        }
+    }
+
+    private void OnTriggerEnter(Collider hitCollider)
+    {
+      if (hitCollider.tag == "Finish")
+        {
+            Disable();
+            if (OnLevelEnd != null)
+            {
+                OnLevelEnd();
+            }
+        }
+    }
+
+    private void Disable()
+    {
+        disabled = true;
     }
 
     public void movePlayer()
@@ -35,6 +65,15 @@ public class PlayerController : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(movement), 0.15f);
         }
 
+        bool confirmMovement = movement != Vector3.zero;
+
         transform.Translate(movement * speed * Time.deltaTime, Space.World);
+
+        animator.SetBool("isMoving", confirmMovement);
+    }
+
+    private void OnDestroy()
+    {
+        GuardPath.OnGuardHasSpottedPlayer -= Disable;
     }
 }
